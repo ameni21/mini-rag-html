@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-import routes
+
+from controllers import baseController, dataController
 from helpers.config import get_settings
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -24,4 +25,5 @@ async def shutdown_span():
 app.on_event("startup")(startup_span)
 app.on_event("shutdown")(shutdown_span)  
 
-app.include_router(routes.base_router)
+app.include_router(baseController.base_router)
+app.include_router(dataController.data_router)

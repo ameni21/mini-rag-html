@@ -5,7 +5,7 @@ from models.enums import ResponseSignal
 import re
 import os
 
-class DataController(BaseService):
+class DataService(BaseService):
     
     def __init__(self):
         super().__init__()
