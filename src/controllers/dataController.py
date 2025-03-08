@@ -169,18 +169,13 @@ async def process_endpoint(request: Request, project_id: int, project_name: str,
 
         for asset_id, file_id in project_files_ids.items():
 
-            file_content = process_controller.get_file_content(file_id=file_id)
+            file_content = process_controller.extract_text_from_html(file_id=file_id)
 
             if file_content is None:
                 logger.error(f"Error while processing file: {file_id}")
                 continue
 
-            file_chunks = process_controller.process_file_content(
-                file_content=file_content,
-                file_id=file_id,
-                chunk_size=chunk_size,
-                overlap_size=overlap_size
-            )
+            file_chunks = process_controller.process_file_content(file_content=file_content,file_id=file_id)
 
             if file_chunks is None or len(file_chunks) == 0:
                 return JSONResponse(

@@ -5,6 +5,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from models.enums import ProcessingEnum
+from bs4 import BeautifulSoup
 
 class ProcessService(BaseService):
 
@@ -14,31 +15,34 @@ class ProcessService(BaseService):
         self.project_id = project_id
         self.project_path = ProjectService().get_project_path(project_id=project_id)
 
-    def get_file_extension(self, file_id: str):
-        return os.path.splitext(file_id)[-1]
+    
+    
+    def extract_text_from_html(self, file_id: str):
 
-    def get_file_loader(self, file_id: str):
-
-        file_ext = self.get_file_extension(file_id=file_id)
         file_path = os.path.join(
             self.project_path,
             file_id
         )
+        """
+        Extracts text from an HTML file using BeautifulSoup.
+        Removes script and style elements.
+        """
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:
+                soup = BeautifulSoup(file, "html.parser")
 
-        if file_ext == ProcessingEnum.TXT.value:
-            return TextLoader(file_path, encoding="utf-8")
+                # Remove script and style tags
+                for script_or_style in soup(["script", "style"]):
+                    script_or_style.extract()
 
-        if file_ext == ProcessingEnum.PDF.value:
-            return PyMuPDFLoader(file_path)
-        
-        return None
+                text = soup.get_text(separator="\n")
+                return [{"page_content": text, "metadata": {"file_name": os.path.basename(file_path)}}]
 
-    def get_file_content(self, file_id: str):
+        except Exception as e:
+            print(f"Error processing HTML file {file_path}: {e}")
+            return None
 
-        loader = self.get_file_loader(file_id=file_id)
-        if loader:
-            return loader.load()
-        return None
+
 
     def process_file_content(self, file_content: list, file_id: str,
                             chunk_size: int=100, overlap_size: int=20):
@@ -50,12 +54,12 @@ class ProcessService(BaseService):
         )
 
         file_content_texts = [
-            rec.page_content
+            rec["page_content"]
             for rec in file_content
         ]
 
         file_content_metadata = [
-            rec.metadata
+            rec["metadata"]
             for rec in file_content
         ]
 
