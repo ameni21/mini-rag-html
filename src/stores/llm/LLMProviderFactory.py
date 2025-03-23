@@ -1,6 +1,7 @@
+from stores.llm.LLMEnums import LLMEnums
+from stores.llm.providers.CoHereProvider import CoHereProvider
+from stores.llm.providers.OpenAIProvider import OpenAIProvider
 
-from .LLMEnums import LLMEnums
-from .providers import OpenAIProvider, CoHereProvider
 
 class LLMProviderFactory:
     def __init__(self, config: dict):

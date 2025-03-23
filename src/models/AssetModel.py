@@ -45,6 +45,15 @@ class AssetModel(BaseDataModel):
             result = await session.execute(stmt)
             record = result.scalar_one_or_none()
         return record
+    
+    async def get_asset(self, asset_name: str):
+        async with self.db_client() as session:
+            async with session.begin():
+                query = select(Asset).where(Asset.asset_name == asset_name)
+                result = await session.execute(query)
+                asset = result.scalar_one_or_none()
+            
+                return asset
 
 
     
