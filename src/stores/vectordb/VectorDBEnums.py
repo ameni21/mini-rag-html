@@ -1,8 +1,8 @@
 from enum import Enum
 
 class VectorDBEnums(Enum):
-    PGVECTOR = "PGVECTOR"
     QDRANT = "QDRANT"
+    CHROMADB = "CHROMADB"
 
 class DistanceMethodEnums(Enum):
     COSINE = "cosine"

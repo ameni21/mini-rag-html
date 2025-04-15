@@ -1,0 +1,19 @@
+
+The company's mission is to empower businesses through advanced AI solutions.
+Our primary tools include FastAPI, LangChain, and ChromaDB for robust backend and retrieval systems.
+
+FastAPI is used to build high-performance web APIs with Python. It ensures fast execution and automatic docs generation.
+LangChain helps developers connect LLMs with external data sources like vector databases or APIs for contextual reasoning.
+ChromaDB is a lightweight, local-first vector database ideal for prototyping retrieval-based systems. It stores document embeddings and supports fast similarity search.
+
+As of 2024, all policies are aligned with GDPR and internal ethical AI standards. This includes secure handling of personal data, transparency, and user consent mechanisms.
+
+All team members are encouraged to document architectural decisions and technical strategies in the internal wiki. Knowledge sharing is critical to our success and innovation.
+
+Recent projects include:
+- A customer support assistant based on RAG
+- A sales enablement chatbot using Web Search APIs (Tavily, Serper)
+- An internal search engine powered by ChromaDB and OpenAI's GPT models
+
+Company values: Innovation, Transparency, Privacy-first, Collaboration.
+
