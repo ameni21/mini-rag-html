@@ -32,8 +32,8 @@ class ProcessService(BaseService):
                 soup = BeautifulSoup(file, "html.parser")
 
                 # Remove script and style tags
-                for script_or_style in soup(["script", "style"]):
-                    script_or_style.extract()
+                #for script_or_style in soup(["script", "style"]):
+                    #script_or_style.extract()
 
                 text = soup.get_text(separator="\n")
                 return [{"page_content": text, "metadata": {"file_name": os.path.basename(file_path)}}]
@@ -41,6 +41,29 @@ class ProcessService(BaseService):
         except Exception as e:
             print(f"Error processing HTML file {file_path}: {e}")
             return None
+        
+    def extract_html_from_file(self, file_id: str):
+        file_path = os.path.join(
+            self.project_path,
+            file_id
+        )
+        """
+        Extracts the full HTML content from an HTML file using BeautifulSoup.
+        Keeps all elements including scripts and styles.
+        """
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:
+                soup = BeautifulSoup(file, "html.parser")
+                
+                # Extract full HTML content, including all tags
+                html_content = str(soup)
+                
+                return [{"page_content": html_content, "metadata": {"file_name": os.path.basename(file_path)}}]
+
+        except Exception as e:
+            print(f"Error processing HTML file {file_path}: {e}")
+            return None
+
 
 
 

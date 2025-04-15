@@ -97,7 +97,7 @@ async def index_project(request: Request, project_id:int, project_name:str, push
 
 
 @nlp_router.get("/index/info/{project_id}")
-async def get_project_index_info(request: Request, project_id: int):
+async def get_project_index_info(request: Request, project_id: int, project_name:str):
 
     project_model = await ProjectModel.create_instance(
         db_client = request.app.db_client
@@ -105,7 +105,8 @@ async def get_project_index_info(request: Request, project_id: int):
 
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_id=project_id,
+        project_name=project_name
     )
 
     nlp_controller = NLPService(
@@ -127,7 +128,7 @@ async def get_project_index_info(request: Request, project_id: int):
     )
 
 @nlp_router.post("/index/search/{project_id}")
-async def search_index(request: Request, project_id: int, search_request: SearchRequest):
+async def search_index(request: Request, project_id: int, project_name:str, search_request: SearchRequest):
 
     project_model = await ProjectModel.create_instance(
         db_client = request.app.db_client
@@ -135,7 +136,8 @@ async def search_index(request: Request, project_id: int, search_request: Search
 
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_id=project_id,
+        project_name=project_name
     )
 
     nlp_controller = NLPService(
@@ -167,7 +169,7 @@ async def search_index(request: Request, project_id: int, search_request: Search
 
 
 @nlp_router.post("/index/answer/{project_id}")
-async def answer_rag(request: Request, project_id: int, search_request: SearchRequest):
+async def answer_rag(request: Request, project_id: int, project_name:str, search_request: SearchRequest):
 
     project_model = await ProjectModel.create_instance(
         db_client = request.app.db_client
@@ -175,7 +177,8 @@ async def answer_rag(request: Request, project_id: int, search_request: SearchRe
 
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_id=project_id,
+        project_name= project_name
     )
 
     nlp_controller = NLPService(

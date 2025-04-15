@@ -153,7 +153,7 @@ async def process_endpoint(request: Request, project_id: int, project_name:str, 
             }
         )
     
-    process_controller = ProcessService(project_id=project_id)
+    process_service= ProcessService(project_id=project_id)
 
     no_records = 0
     no_files = 0
@@ -169,13 +169,13 @@ async def process_endpoint(request: Request, project_id: int, project_name:str, 
 
     for asset_id, file_id in project_files_ids.items():
 
-        file_content = process_controller.get_file_content(file_id=file_id)
+        file_content = process_service.extract_html_from_file(file_id=file_id)
 
         if file_content is None:
             logger.error(f"Error while processing file: {file_id}")
             continue
 
-        file_chunks = process_controller.process_file_content(
+        file_chunks = process_service.process_file_content(
             file_content=file_content,
             file_id=file_id,
             chunk_size=chunk_size,

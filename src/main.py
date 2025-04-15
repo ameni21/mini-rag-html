@@ -39,8 +39,7 @@ async def startup_span():
         provider=settings.VECTOR_DB_BACKEND
     )
     app.vectordb_client.connect()
-    if app.vectordb_client is None:
-        raise ValueError("VectorDB client is not initialized!")
+    
 
     app.template_parser = TemplateParser(
         language=settings.PRIMARY_LANG,

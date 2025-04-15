@@ -31,6 +31,7 @@ class NLPService(BaseService):
         return json.loads( #convert data to dict
             json.dumps(collection_info, default=lambda x : x.__dict__) # convert data to string
         )
+    
     def index_into_vector_db(self, project: Project, chunks: List[DataChunk],
                              chunks_ids: List[int],
                              do_reset: bool = False):
