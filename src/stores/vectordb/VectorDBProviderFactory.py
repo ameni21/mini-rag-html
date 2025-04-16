@@ -1,5 +1,6 @@
 from services.BaseService import BaseService
 from stores.vectordb.providers.QdrantDBProvider import QdrantDBProvider
+from stores.vectordb.providers.chromDBProvider import ChromaDBProvider
 from .VectorDBEnums import VectorDBEnums
 from sqlalchemy.orm import sessionmaker
 
@@ -22,6 +23,12 @@ class VectorDBProviderFactory:
                 distance_method=self.config.VECTOR_DB_DISTANCE_METHOD,
                 default_vector_size=self.config.EMBEDDING_MODEL_SIZE,
                 index_threshold=self.config.VECTOR_DB_PGVEC_INDEX_THRESHOLD,
+            )
+        if provider == VectorDBEnums.CHROMADB.value:
+            chroma_db_client = self.base_service.get_database_path(db_name=self.config.VECTOR_DB_PATH)
+            return ChromaDBProvider(
+                db_client=chroma_db_client,
+                default_vector_size=self.config.EMBEDDING_MODEL_SIZE,
             )
 
         return None

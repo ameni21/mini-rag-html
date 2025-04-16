@@ -16,4 +16,6 @@ psycopg2==2.9.10
 pytest==8.3.4
 bs4==4.13.3
 tokenizers==0.13.3
+chromadb==0.5.23
+
 

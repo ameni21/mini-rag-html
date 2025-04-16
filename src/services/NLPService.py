@@ -139,3 +139,36 @@ class NLPService(BaseService):
         )
 
         return answer, full_prompt, chat_history
+    
+
+    async def answer_llm_question(self,  query: str, limit: int = 10):
+        
+        answer, full_prompt, chat_history = None, None, None
+
+                
+        # step1: Construct LLM prompt
+        system_prompt = self.template_parser.get("llm", "system_prompt")
+
+        
+
+        footer_prompt = self.template_parser.get("llm", "footer_prompt", {
+            "query": query
+        })
+
+        # step2: Construct Generation Client Prompts
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role=self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt = "\n\n".join([ footer_prompt])
+
+        # step3: Retrieve the Answer
+        answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        return answer, full_prompt, chat_history
