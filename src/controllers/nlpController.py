@@ -409,3 +409,46 @@ async def GradeHallucinations(request: Request):
                 "chat_history": chat_history
             }
         )
+
+
+@nlp_router.post("/index/grade_answer")
+async def gradeAnswer(request: Request):
+
+    
+    nlp_service = NLPService(
+        vectordb_client=request.app.vectordb_client,
+        generation_client=request.app.generation_client,
+        embedding_client=request.app.embedding_client,
+        template_parser=request.app.template_parser,
+        #web_search_client = request.app.web_search_client
+    )
+
+    generation = (
+        "The Eiffel Tower was built in 1889 by Gustave Eiffel "
+        "and is located on the Champ de Mars in Paris."
+    )
+
+    query = "when is located in Paris ?"
+
+    answer, full_prompt, chat_history = await  nlp_service.gradeAnswer(  
+        query=query,
+        generation=generation,
+    )
+    
+    if not answer:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_ERROR.value
+            }
+        )
+    
+    return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_SUCCESS.value,
+                "answer": answer.dict(),
+                "full_prompt": full_prompt,
+                "chat_history": chat_history
+            }
+        )

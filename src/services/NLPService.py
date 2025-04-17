@@ -5,6 +5,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from models.db_schemes.minirag.schemes.datachunk import RetrievedDocument
 from services.BaseService import BaseService
 from stores.langgraph.scheme.garderDocuments import GradeDocuments
+from stores.langgraph.scheme.gradeAnswer import GradeAnswer
 from stores.langgraph.scheme.gradeHallucinations import GradeHallucinations
 from stores.langgraph.scheme.routerQuery import RouteQuery
 from stores.llm.LLMEnums import DocumentTypeEnum
@@ -317,6 +318,46 @@ class NLPService(BaseService):
             answer = GradeDocuments(binary_score=cleaned_answer)
         except ValidationError as ve:
             logger.error(f"Failed to parse LLM response into GradeDocuments: {ve}")
+            answer = None
+
+        return answer, full_prompt, chat_history
+    
+
+    async def gradeAnswer(self, query:str,  generation : str):
+        
+        answer, full_prompt, chat_history = None, None, None
+        
+        # step 1: Load prompt components
+        system_prompt = self.template_parser.get("resolution","system_prompt")
+
+        generation_prompt = self.template_parser.get("resolution", "generation_prompt", {"generation": generation} )
+
+        footer_prompt = self.template_parser.get("resolution", "footer_prompt", {"query":query})
+
+         # Step 2: Build chat history 
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role="system"
+                #self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt =  "\n\n".join([ generation_prompt, footer_prompt])
+
+        # Step 3: Call generation provider generate_text function
+
+        raw_answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        # Step 4: Parse the result into the GradeAnswer model
+        try:
+            cleaned_answer = self.binary_score(raw_answer)
+            answer = GradeAnswer(binary_score=cleaned_answer)
+        except ValidationError as ve:
+            logger.error(f"Failed to parse LLM response into GradeAnswer: {ve}")
             answer = None
 
         return answer, full_prompt, chat_history
