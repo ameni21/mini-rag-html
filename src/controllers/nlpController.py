@@ -237,8 +237,8 @@ async def answer_rag(request: Request):
         )
         
 
-@nlp_router.post("/index/answer_web/")
-async def search_web(request: Request,  search_request: SearchRequest):
+@nlp_router.post("/index/answer_web")
+async def search_web(request: Request ):
 
     
     nlp_service = NLPService(
@@ -250,8 +250,10 @@ async def search_web(request: Request,  search_request: SearchRequest):
         
     )
 
+    query = "when is located in Paris ?"
+
     answer = await  nlp_service.web_search_question(
-        query=search_request.text,
+        query=query,
 
     )
     
