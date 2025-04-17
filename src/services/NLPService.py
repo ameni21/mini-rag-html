@@ -122,17 +122,10 @@ class NLPService(BaseService):
 
         return results
     
-    async def answer_rag_question(self, project: Project, query: str, limit: int = 10):
+    async def answer_rag_question(self,  query: str, retrieve_documents:List[RetrievedDocument] ):
         
         answer, full_prompt, chat_history = None, None, None
 
-        
-        #step1: retrieve relative documents
-        retrieve_documents = await self.search_vector_db_collection(
-            project=project,
-            text=query,
-            limit=limit
-        )
 
         if not retrieve_documents or len(retrieve_documents)==0:
             return answer, full_prompt, chat_history 

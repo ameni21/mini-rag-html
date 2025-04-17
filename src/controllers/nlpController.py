@@ -188,19 +188,10 @@ async def search_index(request: Request, project_id: int, project_name:str, sear
     )
 
 
-@nlp_router.post("/index/answer/{project_id}")
-async def answer_rag(request: Request, project_id: int, project_name:str, search_request: SearchRequest):
+@nlp_router.post("/index/answer")
+async def answer_rag(request: Request):
 
-    project_model = await ProjectModel.create_instance(
-        db_client = request.app.db_client
-    )
-
-
-    project = await project_model.get_project_or_create_one(
-        project_id=project_id,
-        project_name= project_name
-    )
-
+    
     nlp_service = NLPService(
         vectordb_client=request.app.vectordb_client,
         generation_client=request.app.generation_client,
@@ -209,10 +200,22 @@ async def answer_rag(request: Request, project_id: int, project_name:str, search
         #web_search_client = request.app.web_search_client
     )
 
+    documents = [
+    { "doc_num": 1, "chunk_text": "The Eiffel Tower was completed in 1889 and designed by Gustave Eiffel." },
+    { "doc_num": 2, "chunk_text": "It is located on the Champ de Mars in Paris, France, and stands 324 m tall." },
+    { "doc_num": 3, "chunk_text": "It was originally built as the entrance arch for the 1889 World’s Fair." },
+    ]
+
+    retrieved_documents = [
+        RetrievedDocument(text=doc["chunk_text"], score=0.0)  
+        for doc in documents
+    ]
+
+    query = "when is located in Paris ?"
+
     answer, full_prompt, chat_history = await  nlp_service.answer_rag_question(
-        project=project,
-        query=search_request.text,
-        limit=search_request.limit,
+        retrieve_documents=retrieved_documents,  
+        query=query
     )
     
     if not answer:
