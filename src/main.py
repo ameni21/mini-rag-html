@@ -6,7 +6,7 @@ from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
 from stores.llm.templates.template_parser import TemplateParser
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-
+from stores.webSearch.webSearchProviderFactory import WebSearchProviderFactory
 
 app = FastAPI()
 
@@ -24,10 +24,14 @@ async def startup_span():
 
     llm_provider_factory = LLMProviderFactory(settings)
     vectordb_provider_factory = VectorDBProviderFactory(config=settings, db_client=app.db_client)
+    web_provider_factory = WebSearchProviderFactory(settings)
 
     # generation client
     app.generation_client = llm_provider_factory.create(provider=settings.GENERATION_BACKEND)
     app.generation_client.set_generation_model(model_id = settings.GENERATION_MODEL_ID)
+
+    # web search client
+    #app.web_search_client = web_provider_factory.create(provider=settings.WEB_SEARCHING_BACKEND)
 
     # embedding client
     app.embedding_client = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
@@ -49,8 +53,7 @@ async def shutdown_span():
     app.db_engine
     app.vectordb_client.disconnect()
 
-#app.router.lifespan.on_startup.append(startup_span)
-#app.router.lifespan.on_shutdown.append(shutdown_span)
+
 
 app.on_event("startup")(startup_span)
 app.on_event("shutdown")(shutdown_span)

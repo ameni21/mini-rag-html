@@ -1,9 +1,17 @@
 
+from pydantic import ValidationError
 from models.db_schemes import Project, DataChunk
+from langchain_community.tools.tavily_search import TavilySearchResults
 from services.BaseService import BaseService
+from stores.langgraph.scheme.routerQuery import RouteQuery
 from stores.llm.LLMEnums import DocumentTypeEnum
+from helpers.config import get_settings
 from typing import List
+import logging
 import json
+import os
+
+logger = logging.getLogger('uvicorn.error')
 
 class NLPService(BaseService):
 
@@ -15,6 +23,17 @@ class NLPService(BaseService):
         self.generation_client = generation_client
         self.embedding_client = embedding_client
         self.template_parser = template_parser
+
+    @staticmethod
+    def normalize_routing_output(raw: str):
+        raw = raw.strip().lower()
+        if "vector" in raw:
+            return "vectorstore"
+        elif "web" in raw :
+            return "web_search"
+        elif "external" in raw:
+            return "external"
+        
 
     def create_collection_name(self, project_id: str):
         return f"collection_{self.vectordb_client.default_vector_size}_{project_id}".strip()
@@ -97,78 +116,102 @@ class NLPService(BaseService):
         
         answer, full_prompt, chat_history = None, None, None
 
-        # step1: retrieve related documents
-        retrieved_documents = await self.search_vector_db_collection(
+        
+        #step1: retrieve relative documents
+        retrieve_documents = await self.search_vector_db_collection(
             project=project,
             text=query,
-            limit=limit,
+            limit=limit
         )
 
-        if not retrieved_documents or len(retrieved_documents) == 0:
-            return answer, full_prompt, chat_history
+        if not retrieve_documents or len(retrieve_documents)==0:
+            return answer, full_prompt, chat_history 
         
-        # step2: Construct LLM prompt
-        system_prompt = self.template_parser.get("rag", "system_prompt")
-
+        # step 2: construct LLM prompt
+        system_prompt = self.template_parser.get("rag","system_prompt")
+   
         documents_prompts = "\n".join([
-            self.template_parser.get("rag", "document_prompt", {
+            self.template_parser.get("rag","documents_prompt", {
                     "doc_num": idx + 1,
                     "chunk_text": self.generation_client.process_text(doc.text),
-            })
-            for idx, doc in enumerate(retrieved_documents)
+                })
+            for idx, doc in enumerate(retrieve_documents)
         ])
 
-        footer_prompt = self.template_parser.get("rag", "footer_prompt", {
-            "query": query
-        })
+        footer_prompt = self.template_parser.get("rag", "footer_prompt",{"query": query})
 
-        # step3: Construct Generation Client Prompts
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
-                role=self.generation_client.enums.SYSTEM.value,
+                role="system"
+                #self.generation_client.enums.SYSTEM.value,
             )
         ]
 
-        full_prompt = "\n\n".join([ documents_prompts,  footer_prompt])
+        full_prompt =  "\n\n".join([documents_prompts,footer_prompt])
 
-        # step4: Retrieve the Answer
         answer = self.generation_client.generate_text(
             prompt=full_prompt,
             chat_history=chat_history
         )
 
         return answer, full_prompt, chat_history
+        
+    
+    async def web_search_question(self, query: str):
+        settings = get_settings()
+        os.environ["TAVILY_API_KEY"] = settings.TAVILY_API_KEY
+        
+        
+        # step1: retrieve related documents
+        web_search_tool = TavilySearchResults(k=3, tavily_api_key=os.environ["TAVILY_API_KEY"])
+        
+        results_list = web_search_tool.invoke({"query": query})
+
+        if not results_list or len(results_list) == 0:
+            return False
+        
+        return results_list
+    
     
 
-    async def answer_llm_question(self,  query: str, limit: int = 10):
+    
+
+    async def llm_router(self, query: str):
         
         answer, full_prompt, chat_history = None, None, None
 
-                
-        # step1: Construct LLM prompt
-        system_prompt = self.template_parser.get("llm", "system_prompt")
+        # step 1: Route Query model
+        router_query = RouteQuery
 
         
+        # step 2: Load prompt components
+        system_prompt = self.template_parser.get("routing","system_prompt")
+        footer_prompt = self.template_parser.get("routing", "footer_prompt",{"query": query})
 
-        footer_prompt = self.template_parser.get("llm", "footer_prompt", {
-            "query": query
-        })
-
-        # step2: Construct Generation Client Prompts
+         # Step 3: Build chat history 
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
-                role=self.generation_client.enums.SYSTEM.value,
+                role="system"
+                
             )
         ]
 
-        full_prompt = "\n\n".join([ footer_prompt])
+        full_prompt =  "\n\n".join([footer_prompt])
 
-        # step3: Retrieve the Answer
-        answer = self.generation_client.generate_text(
+        # Step 4: Call generation provider generate_text function
+        raw_answer = self.generation_client.generate_text(
             prompt=full_prompt,
             chat_history=chat_history
         )
+
+        # Step 5: Parse the result into the RouteQuery model
+        try:
+            cleaned_answer = self.normalize_routing_output(raw_answer)
+            answer = RouteQuery(datasource=cleaned_answer)
+        except ValidationError as ve:
+            logger.error(f"Failed to parse LLM response into RouteQuery: {ve}")
+            answer = None
 
         return answer, full_prompt, chat_history

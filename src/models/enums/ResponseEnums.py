@@ -19,7 +19,10 @@ class ResponseSignal(Enum):
     VECTORDB_SEARCH_SUCCESS = "vectordb_search_success"
     RAG_ANSWER_ERROR = "rag_answer_error"
     RAG_ANSWER_SUCCESS = "rag_answer_success"
-    TRANSCRIPT_SEARCH_ERROR = "transcript_search_error"
-    TRANSCRIPT_SEARCH_SUCCESS = "transcript_search_success"
+    LLM_ANSWER_ERROR = "llm_answer_error"
+    LLM_ANSWER_SUCCESS = "llm_answer_success"
+    WEB_ANSWER_ERROR = "web_answer_error"
+    WEB_ANSWER_SUCCESS = "web_answer_success"
+   
     
 

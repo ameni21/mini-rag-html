@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     GENERATION_DAFAULT_MAX_TOKENS: int = None
     GENERATION_DAFAULT_TEMPERATURE: float = None
 
+    WEB_SEARCHING_BACKEND: str = None
+    TAVILY_API_KEY: str = None
+    TAVILY_API_URL: str = None
+
     VECTOR_DB_BACKEND_LITERAL: List[str] = None
     VECTOR_DB_BACKEND : str
     VECTOR_DB_PATH : str
