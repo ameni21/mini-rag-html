@@ -3,6 +3,7 @@ from pydantic import ValidationError
 from models.db_schemes import Project, DataChunk
 from langchain_community.tools.tavily_search import TavilySearchResults
 from services.BaseService import BaseService
+from stores.langgraph.scheme.garderDocuments import GradeDocuments
 from stores.langgraph.scheme.routerQuery import RouteQuery
 from stores.llm.LLMEnums import DocumentTypeEnum
 from helpers.config import get_settings
@@ -24,15 +25,22 @@ class NLPService(BaseService):
         self.embedding_client = embedding_client
         self.template_parser = template_parser
 
-    @staticmethod
-    def normalize_routing_output(raw: str):
-        raw = raw.strip().lower()
+    
+    def normalize_routing_output(self, raw: str):
+        self.raw = raw.strip().lower()
         if "vector" in raw:
             return "vectorstore"
         elif "web" in raw :
             return "web_search"
         elif "external" in raw:
             return "external"
+        
+    def binary_score(self, raw: str):
+        self.raw = raw.strip().lower()
+        if "yes" in raw:
+            return "yes"
+        else:
+            return "no"
         
 
     def create_collection_name(self, project_id: str):
@@ -181,15 +189,12 @@ class NLPService(BaseService):
         
         answer, full_prompt, chat_history = None, None, None
 
-        # step 1: Route Query model
-        router_query = RouteQuery
-
-        
-        # step 2: Load prompt components
+                
+        # step 1: Load prompt components
         system_prompt = self.template_parser.get("routing","system_prompt")
         footer_prompt = self.template_parser.get("routing", "footer_prompt",{"query": query})
 
-         # Step 3: Build chat history 
+         # Step 2: Build chat history 
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
@@ -200,18 +205,76 @@ class NLPService(BaseService):
 
         full_prompt =  "\n\n".join([footer_prompt])
 
-        # Step 4: Call generation provider generate_text function
+        # Step 2: Call generation provider generate_text function
         raw_answer = self.generation_client.generate_text(
             prompt=full_prompt,
             chat_history=chat_history
         )
 
-        # Step 5: Parse the result into the RouteQuery model
+        # Step 4: Parse the result into the RouteQuery model
         try:
             cleaned_answer = self.normalize_routing_output(raw_answer)
             answer = RouteQuery(datasource=cleaned_answer)
         except ValidationError as ve:
             logger.error(f"Failed to parse LLM response into RouteQuery: {ve}")
+            answer = None
+
+        return answer, full_prompt, chat_history
+    
+    async def gard_documents_retrieval(self, project: Project, query: str, limit: int = 10):
+        
+        answer, full_prompt, chat_history = None, None, None
+
+    
+
+        #step1: retrieve relative documents
+        retrieve_documents = await self.search_vector_db_collection(
+            project=project,
+            text=query,
+            limit=limit
+        )
+
+        if not retrieve_documents or len(retrieve_documents)==0:
+            return answer, full_prompt, chat_history 
+
+        
+        # step 2: Load prompt components
+        system_prompt = self.template_parser.get("garding","system_prompt")
+
+        documents_prompts = "\n".join([
+            self.template_parser.get("garding","documents_prompt", {
+                    "doc_num": idx + 1,
+                    "chunk_text": self.generation_client.process_text(doc.text),
+                })
+            for idx, doc in enumerate(retrieve_documents)
+        ])
+
+        footer_prompt = self.template_parser.get("garding", "footer_prompt",{"query": query})
+
+         # Step 3: Build chat history 
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role="system"
+                
+            )
+        ]
+
+        full_prompt =  "\n\n".join([documents_prompts, footer_prompt])
+
+        # Step 4: Call generation provider generate_text function
+
+        raw_answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        # Step 5: Parse the result into the GradeDocuments model
+        try:
+            cleaned_answer = self.binary_score(raw_answer)
+            answer = GradeDocuments(binary_score=cleaned_answer)
+        except ValidationError as ve:
+            logger.error(f"Failed to parse LLM response into GradeDocuments: {ve}")
             answer = None
 
         return answer, full_prompt, chat_history

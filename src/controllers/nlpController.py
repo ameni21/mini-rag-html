@@ -301,3 +301,49 @@ async def llm_router(request: Request, search_request: SearchRequest):
                 "chat_history": chat_history
             }
         )
+
+
+@nlp_router.post("/index/gard_documents/{project_id}")
+async def gard_documents(request: Request, project_id: int, project_name:str, search_request: SearchRequest):
+
+    project_model = await ProjectModel.create_instance(
+        db_client = request.app.db_client
+    )
+
+
+    project = await project_model.get_project_or_create_one(
+        project_id=project_id,
+        project_name= project_name
+    )
+
+    nlp_service = NLPService(
+        vectordb_client=request.app.vectordb_client,
+        generation_client=request.app.generation_client,
+        embedding_client=request.app.embedding_client,
+        template_parser=request.app.template_parser,
+        #web_search_client = request.app.web_search_client
+    )
+
+    answer, full_prompt, chat_history = await  nlp_service.gard_documents_retrieval(
+        project=project,
+        query=search_request.text,
+        limit=search_request.limit,
+    )
+    
+    if not answer:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_ERROR.value
+            }
+        )
+    
+    return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_SUCCESS.value,
+                "answer": answer.dict(),
+                "full_prompt": full_prompt,
+                "chat_history": chat_history
+            }
+        )
