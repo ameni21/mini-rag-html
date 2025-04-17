@@ -2,8 +2,10 @@
 from pydantic import ValidationError
 from models.db_schemes import Project, DataChunk
 from langchain_community.tools.tavily_search import TavilySearchResults
+from models.db_schemes.minirag.schemes.datachunk import RetrievedDocument
 from services.BaseService import BaseService
 from stores.langgraph.scheme.garderDocuments import GradeDocuments
+from stores.langgraph.scheme.gradeHallucinations import GradeHallucinations
 from stores.langgraph.scheme.routerQuery import RouteQuery
 from stores.llm.LLMEnums import DocumentTypeEnum
 from helpers.config import get_settings
@@ -221,6 +223,59 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
+    async def GradeHallucinations(self, retrieve_documents:List[RetrievedDocument],  generation : str):
+        
+        answer, full_prompt, chat_history = None, None, None
+        
+
+        if not retrieve_documents or len(retrieve_documents)==0:
+            return answer, full_prompt, chat_history 
+
+        
+        # step 2: Load prompt components
+        system_prompt = self.template_parser.get("grounding","system_prompt")
+
+        document_prompts = "\n".join([
+        self.template_parser.get("grounding", "documents_prompt", {
+            "doc_num": idx + 1,
+            "chunk_text": doc.text,
+        }) for idx, doc in enumerate(retrieve_documents)
+
+        ])
+
+        generation_prompt = self.template_parser.get("grounding", "generation_prompt", {"generation": generation} )
+
+        footer_prompt = self.template_parser.get("grounding", "footer_prompt")
+
+         # Step 3: Build chat history 
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role="system"
+                #self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt =  "\n\n".join([document_prompts, generation_prompt, footer_prompt])
+
+        # Step 4: Call generation provider generate_text function
+
+        raw_answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        # Step 5: Parse the result into the GradeHallucinations model
+        try:
+            cleaned_answer = self.binary_score(raw_answer)
+            answer = GradeHallucinations(binary_score=cleaned_answer)
+        except ValidationError as ve:
+            logger.error(f"Failed to parse LLM response into GradeHallucinations: {ve}")
+            answer = None
+
+        return answer, full_prompt, chat_history
+    
+
     async def gard_documents_retrieval(self, project: Project, query: str, limit: int = 10):
         
         answer, full_prompt, chat_history = None, None, None

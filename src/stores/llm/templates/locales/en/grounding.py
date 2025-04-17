@@ -3,20 +3,35 @@ from string import Template
 #### LLM Grounding Assessment Prompt ####
 
 #### System ####
-grounding_system_prompt = Template("\n".join([
-    "You are a grader responsible for evaluating whether an LLM-generated answer is grounded in a provided set of retrieved facts.",
-    "Grounded means that the answer is directly supported by or consistent with the facts.",
-    "Only return a binary score: 'yes' if grounded, 'no' if not grounded.",
-    "Do not explain your reasoning. Just return 'yes' or 'no'."
+system_prompt = Template("\n".join([
+    "You are a grader assessing whether an LLM generation is grounded in",
+    "supported by a set of retrieved facts. \n ",
+    "Give a binary score 'yes' or 'no'. 'Yes' means that the answer is grounded in",
+    "supported by the  facts.."
+]))
+
+
+
+
+
+#### Facts ( documents) ####
+documents_prompt = Template("\n".join([
+    "### facts:",
+    "",
+    "## Document No: $doc_num",
+    "### Content: $chunk_text",
+]))
+
+#### Generation ####
+generation_prompt = Template("\n".join([
+    "### LLM generation:",
+    "$generation"
 ]))
 
 #### Footer ####
-grounding_footer_prompt = Template("\n".join([
-    "### Retrieved Facts:",
-    "$facts",
+footer_prompt = Template("\n".join([
     "",
-    "### LLM-Generated Answer:",
-    "$answer",
+    "Based only on the above facts, return 'yes' or 'no'.",
     "",
-    "### Grounded in Facts? (yes or no):"
+    "## Answer:",
 ]))

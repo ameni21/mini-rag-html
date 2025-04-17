@@ -2,11 +2,14 @@ from fastapi import FastAPI, APIRouter, status, Request
 from fastapi.responses import JSONResponse
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
+from models.db_schemes.minirag.schemes.datachunk import RetrievedDocument
 from models.enums import ResponseSignal
 import logging
 from controllers.scheme.nlp import PushRequest, SearchRequest
 from services.NLPService import NLPService
 from tqdm.auto import tqdm
+
+
 
 
 
@@ -328,6 +331,59 @@ async def gard_documents(request: Request, project_id: int, project_name:str, se
         project=project,
         query=search_request.text,
         limit=search_request.limit,
+    )
+    
+    if not answer:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_ERROR.value
+            }
+        )
+    
+    return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_SUCCESS.value,
+                "answer": answer.dict(),
+                "full_prompt": full_prompt,
+                "chat_history": chat_history
+            }
+        )
+
+
+@nlp_router.post("/index/GradeHallucinations")
+async def GradeHallucinations(request: Request):
+
+    
+
+    nlp_service = NLPService(
+        vectordb_client=request.app.vectordb_client,
+        generation_client=request.app.generation_client,
+        embedding_client=request.app.embedding_client,
+        template_parser=request.app.template_parser,
+        #web_search_client = request.app.web_search_client
+    )
+
+    documents = [
+    { "doc_num": 1, "chunk_text": "The Eiffel Tower was completed in 1889 and designed by Gustave Eiffel." },
+    { "doc_num": 2, "chunk_text": "It is located on the Champ de Mars in Paris, France, and stands 324 m tall." },
+    { "doc_num": 3, "chunk_text": "It was originally built as the entrance arch for the 1889 World’s Fair." },
+    ]
+
+    retrieved_documents = [
+        RetrievedDocument(text=doc["chunk_text"], score=0.0)  
+        for doc in documents
+    ]
+
+    generation = (
+        "The Eiffel Tower was built in 1889 by Gustave Eiffel "
+        "and is located on the Champ de Mars in Paris."
+    )
+
+    answer, full_prompt, chat_history = await nlp_service.GradeHallucinations(
+        retrieve_documents=retrieved_documents,  
+        generation=generation
     )
     
     if not answer:
