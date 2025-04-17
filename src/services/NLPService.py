@@ -361,3 +361,31 @@ class NLPService(BaseService):
             answer = None
 
         return answer, full_prompt, chat_history
+    
+
+    async def question_re_writer(self,  query: str ):
+        
+        answer, full_prompt, chat_history = None, None, None
+        
+        #  construct LLM prompt
+        system_prompt = self.template_parser.get("rewriter","system_prompt")
+   
+        
+        footer_prompt = self.template_parser.get("rewriter", "footer_prompt",{"query": query})
+
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role="system"
+                #self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt =  "\n\n".join([footer_prompt])
+
+        answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        return answer, full_prompt, chat_history
