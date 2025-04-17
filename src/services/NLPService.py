@@ -236,10 +236,11 @@ class NLPService(BaseService):
         system_prompt = self.template_parser.get("grounding","system_prompt")
 
         document_prompts = "\n".join([
-        self.template_parser.get("grounding", "documents_prompt", {
-            "doc_num": idx + 1,
-            "chunk_text": doc.text,
-        }) for idx, doc in enumerate(retrieve_documents)
+            self.template_parser.get("grounding", "documents_prompt", {
+                    "doc_num": idx + 1,
+                    "chunk_text": doc.text,
+                }) 
+            for idx, doc in enumerate(retrieve_documents)
 
         ])
 
@@ -276,18 +277,11 @@ class NLPService(BaseService):
         return answer, full_prompt, chat_history
     
 
-    async def gard_documents_retrieval(self, project: Project, query: str, limit: int = 10):
+    async def gard_documents_retrieval(self, retrieve_documents:List[RetrievedDocument]):
         
         answer, full_prompt, chat_history = None, None, None
 
     
-
-        #step1: retrieve relative documents
-        retrieve_documents = await self.search_vector_db_collection(
-            project=project,
-            text=query,
-            limit=limit
-        )
 
         if not retrieve_documents or len(retrieve_documents)==0:
             return answer, full_prompt, chat_history 
@@ -304,7 +298,7 @@ class NLPService(BaseService):
             for idx, doc in enumerate(retrieve_documents)
         ])
 
-        footer_prompt = self.template_parser.get("garding", "footer_prompt",{"query": query})
+        footer_prompt = self.template_parser.get("garding", "footer_prompt")
 
          # Step 3: Build chat history 
         chat_history = [
