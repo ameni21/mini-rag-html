@@ -7,6 +7,8 @@ from stores.llm.templates.template_parser import TemplateParser
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from stores.webSearch.webSearchProviderFactory import WebSearchProviderFactory
+from langsmith import utils
+
 
 app = FastAPI()
 
@@ -48,6 +50,8 @@ async def startup_span():
         language=settings.PRIMARY_LANG,
         default_language=settings.DEFAULT_LANG,
     )
+
+    utils.tracing_is_enabled()
 
 async def shutdown_span():
     app.db_engine

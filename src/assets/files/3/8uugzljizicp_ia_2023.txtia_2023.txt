@@ -1,0 +1,70 @@
+ARTIFICIAL INTELLIGENCE
+AND LIFE IN 2030
+ONE HUNDRED YEAR STUDY ON ARTIFICIAL INTELLIGENCE | REPORT OF THE 2015 STUDY PANEL | SEPTEMBER 2016
+
+PREFACE
+The One Hundred Year Study on
+Artificial Intelligence, launched
+in the fall of 2014, is a longterm investigation of the field of
+Artificial Intelligence (AI) and
+its influences on people, their
+communities, and society. It
+considers the science, engineering,
+and deployment of AI-enabled
+computing systems. As its core
+activity, the Standing Committee
+that oversees the One Hundred
+Year Study forms a Study Panel
+every five years to assess the
+current state of AI. The Study
+Panel reviews AI’s progress in the years following the immediately prior report,
+envisions the potential advances that lie ahead, and describes the technical and
+societal challenges and opportunities these advances raise, including in such arenas as
+ethics, economics, and the design of systems compatible with human cognition. The
+overarching purpose of the One Hundred Year Study’s periodic expert review is to
+provide a collected and connected set of reflections about AI and its influences as the
+field advances. The studies are expected to develop syntheses and assessments that
+provide expert-informed guidance for directions in
+AI research, development, and systems design, as well as programs and policies to
+help ensure that these systems broadly benefit individuals and society.1
+The One Hundred Year Study is modeled on an earlier effort informally known as
+the “AAAI Asilomar Study.” During 2008-2009, the then president of the Association
+for the Advancement of Artificial Intelligence (AAAI), Eric Horvitz, assembled a
+group of AI experts from multiple institutions and areas of the field, along with
+scholars of cognitive science, philosophy, and law. Working in distributed subgroups,
+the participants addressed near-term AI developments, long-term possibilities,
+and legal and ethical concerns, and then came together in a three-day meeting at
+Asilomar to share and discuss their findings. A short written report on the intensive
+meeting discussions, amplified by the participants’ subsequent discussions with other
+colleagues, generated widespread interest and debate in the field and beyond.
+The impact of the Asilomar meeting, and important advances in AI that included
+AI algorithms and technologies starting to enter daily life around the globe, spurred
+the idea of a long-term recurring study of AI and its influence on people and society.
+The One Hundred Year Study was subsequently endowed at a university to enable 
+extended deep thought and cross-disciplinary scholarly investigations that could
+inspire innovation and provide intelligent advice to government agencies and industry.
+This report is the first in the planned series of studies that will continue for at least
+a hundred years. The Standing Committee defined a Study Panel charge for the
+inaugural Study Panel in the summer of 2015 and recruited Professor Peter Stone,
+at the University of Texas at Austin, to chair the panel. The seventeen-member
+Study Panel, comprised of experts in AI from academia, corporate laboratories
+and industry, and AI-savvy scholars in law, political science, policy, and economics,
+was launched in mid-fall 2015. The participants represent diverse specialties and
+geographic regions, genders, and career stages.
+The Standing Committee extensively discussed ways to frame the Study Panel
+charge to consider both recent advances in AI and potential societal impacts on jobs,
+the environment, transportation, public safety, healthcare, community engagement,
+and government. The committee considered various ways to focus the study,
+including surveying subfields and their status, examining a particular technology
+such as machine learning or natural language processing, and studying particular
+application areas such as healthcare or transportation. The committee ultimately
+chose a thematic focus on “AI and Life in 2030” to recognize that AI’s various uses
+and impacts will not occur independently of one another, or of a multitude of other
+societal and technological developments. Acknowledging the central role cities have
+played throughout most of human experience, the focus was narrowed to the large
+urban areas where most people live. The Standing Committee further narrowed the
+focus to a typical North American city in recognition of the great variability of urban
+settings and cultures around the world, and limits on the first Study Panel’s efforts.
+The Standing Committee expects that the projections, assessments, and proactive
+guidance stemming from the study will have broader global relevance and is making
+plans for future studies to expand the scope of the project internationally.

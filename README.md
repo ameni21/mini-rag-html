@@ -1,6 +1,15 @@
-# mini-rag-html
+# Multi-Source RAG Chatbot
 
-This is a minimal implementation of the RAG model for question answering from HTML pages 
+The objective of this project is to design and implement a Retrieval-Augmented
+Generation (RAG) chatbot capable of answering user queries using three retrieval
+modes:
+1.​ Native LLM responses (direct from model)
+2.​ Vectorstore-based RAG using ChromaDB and LangGraph
+3.​ Web search-based augmentation using a search API/tool (e.g., Tavily or
+Serper)
+The chatbot should dynamically choose the best retrieval mode based on the
+nature of the user’s query, demonstrating context awareness and retrieval strategy
+switching.
 
 ## Table of Contents
 - Requirements
@@ -14,7 +23,7 @@ export PS1="\[\033[01;32m\]\u@\h:\w\n\[\033[00m\]\$ "
 
 ## Requirements
 
- Python 3.8 or later
+ Python 3.10 or later
 
 #### Install Dependencies 
 
@@ -56,6 +65,11 @@ $ pip install -r requirements.txt
 $ cp .env.example .env
 ```
 Set your environment variables in the .env file. Like OPENAI_API_KEY value.
+
+### Run Alembic Migration 
+```bash
+$ alembic upgrade head
+```
 
 ### Run Docker Compose Services
 ```bash 

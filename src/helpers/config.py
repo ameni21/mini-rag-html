@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     DEFAULT_LANG: str = "en"
     PRIMARY_LANG: str = "en"
 
+    LANGSMITH_API_KEY: str = None
+    LANGSMITH_TRACING_V2: str = None
+    LANGSMITH__PROJECT: str = None
+
     
     class Config:
         env_file = ".env"

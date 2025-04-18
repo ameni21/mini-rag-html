@@ -10,6 +10,7 @@ from stores.langgraph.scheme.gradeHallucinations import GradeHallucinations
 from stores.langgraph.scheme.routerQuery import RouteQuery
 from stores.llm.LLMEnums import DocumentTypeEnum
 from helpers.config import get_settings
+from langsmith import traceable
 from typing import List
 import logging
 import json
@@ -35,8 +36,8 @@ class NLPService(BaseService):
             return "vectorstore"
         elif "web" in raw :
             return "web_search"
-        elif "external" in raw:
-            return "external"
+        elif "internal" in raw:
+            return "internal"
         
     def binary_score(self, raw: str):
         self.raw = raw.strip().lower()
@@ -91,12 +92,13 @@ class NLPService(BaseService):
         )
 
         return True
-
-    async def search_vector_db_collection(self, project: Project, text: str, limit: int = 10):
+    
+    @traceable(run_type="retriever")
+    async def search_vector_db_collection(self, project_id: int, text: str, limit: int = 10):
 
         # step1: get collection name
         query_vector = None
-        collection_name = self.create_collection_name(project_id=project.project_id)
+        collection_name = self.create_collection_name(project_id=project_id)
 
         # step2: get text embedding vector
         vectors = self.embedding_client.embed_text(text=text, 
@@ -154,6 +156,36 @@ class NLPService(BaseService):
 
         full_prompt =  "\n\n".join([documents_prompts,footer_prompt])
 
+        answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        return answer, full_prompt, chat_history
+    
+    async def answer_llm_question(self,  query: str):
+        
+        answer, full_prompt, chat_history = None, None, None
+
+                
+        # step1: Construct LLM prompt
+        system_prompt = self.template_parser.get("llm", "system_prompt")
+
+        footer_prompt = self.template_parser.get("llm", "footer_prompt", {
+            "query": query
+        })
+
+        # step2: Construct Generation Client Prompts
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role=self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt = "\n\n".join([ footer_prompt])
+
+        # step3: Retrieve the Answer
         answer = self.generation_client.generate_text(
             prompt=full_prompt,
             chat_history=chat_history
@@ -271,7 +303,7 @@ class NLPService(BaseService):
         return answer, full_prompt, chat_history
     
 
-    async def gard_documents_retrieval(self, retrieve_documents:List[RetrievedDocument]):
+    async def gard_documents_retrieval(self, query:str, retrieve_documents:List[RetrievedDocument]):
         
         answer, full_prompt, chat_history = None, None, None
 
@@ -292,7 +324,7 @@ class NLPService(BaseService):
             for idx, doc in enumerate(retrieve_documents)
         ])
 
-        footer_prompt = self.template_parser.get("garding", "footer_prompt")
+        footer_prompt = self.template_parser.get("garding", "footer_prompt", {"query":query})
 
          # Step 3: Build chat history 
         chat_history = [

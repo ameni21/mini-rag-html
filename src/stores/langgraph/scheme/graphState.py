@@ -13,6 +13,7 @@ class GraphState(TypedDict):
         documents: list of documents
     """
 
+    project_id: int
     question: str
     generation: str
     documents: List[str]

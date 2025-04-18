@@ -21,7 +21,10 @@ documents_prompt = Template(
 
 #### Footer ####
 footer_prompt = Template("\n".join([
-    "Based only on the above documents, please relevant yes or no.",
+    "Based on the above documents and this question, please relevant yes or no.",
+    "",
+    "## Question:",
+    "$query",
     "",
     "## Answer:",
 ]))
