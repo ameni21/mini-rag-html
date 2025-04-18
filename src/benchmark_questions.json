@@ -9,7 +9,7 @@
         {"question": "What are the most popular open-source AI projects today?", "answer": "web"},
         {"question": "What does the term ‘epoch’ mean in machine learning?", "answer": "internal"},
         {"question": "Name the capital of Germany.", "answer": "internal"},
-        {"question": "What are the benefits of using Long Short-Term Memory networks?", "answer": "vector"},
+        {"question": "What are the benefits of using Long Short-Term Memory networks?", "answer": "vector"}, 
         {"question": "What are the latest trends in generative AI for 2025?", "answer": "web"},
         {"question": "How is the attention mechanism used in transformers?", "answer": "vector"},
         {"question": "What was the first video game ever created?", "answer": "internal"},

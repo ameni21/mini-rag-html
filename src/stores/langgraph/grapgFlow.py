@@ -41,7 +41,7 @@ class GraphFlow:
             query=state["question"],
             retrieve_documents=state["documents"]
         )
-        grade = score.binary_score
+        grade = score[0].binary_score
         logger.info(f"📊 Document Relevance Score: {grade}")
         return "generate" if grade == "yes" else "transform_query"
 
@@ -51,7 +51,7 @@ class GraphFlow:
             retrieve_documents=state["documents"],
             generation=state["generation"]
         )
-        if hallucination_score.binary_score != "yes":
+        if hallucination_score[0].binary_score != "yes":
             return "retry_generation"
 
         quality_score = self.nlp_service.gradeAnswer(

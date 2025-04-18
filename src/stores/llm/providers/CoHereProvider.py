@@ -65,34 +65,71 @@ class CoHereProvider(LLMInterface):
         
         return response.text
     
-    def embed_text(self, text: Union[str, List[str]], document_type: str = None):
+    async def embed_text(
+        self,
+        text: Union[str, List[str]],
+        document_type: str = None
+    ) -> Union[List[List[float]], None]:
+        """
+        Embed one or more texts using the Cohere API.
+        Returns a list of embedding vectors (each a list of floats), or None on failure.
+        """
+
+        # 1) Sanity checks
         if not self.client:
             self.logger.error("CoHere client was not set")
             return None
-        
-        if isinstance(text, str):
-            text = [text]
-        
         if not self.embedding_model_id:
             self.logger.error("Embedding model for CoHere was not set")
             return None
-        
+
+        # 2) Normalize input into a list of strings
+        #    If someone passes a Pydantic model (or other), try to extract `.text`
+        if isinstance(text, str):
+            iterable_texts = [text]
+        elif isinstance(text, list) and all(isinstance(t, str) for t in text):
+            iterable_texts = text
+        else:
+            # fallback for GraphRequest or similar
+            try:
+                iterable_texts = [text.text]
+            except Exception:
+                self.logger.error(
+                    f"embed_text expected str or List[str], got {type(text)}"
+                )
+                return None
+
+        # 3) Choose the input type enum
         input_type = CoHereEnums.DOCUMENT
-        if document_type == DocumentTypeEnum.QUERY:
+        if document_type == DocumentTypeEnum.QUERY.value:
             input_type = CoHereEnums.QUERY
 
-        response = self.client.embed(
-            model = self.embedding_model_id,
-            texts = [ self.process_text(t) for t in text ],
-            input_type = input_type,
-            embedding_types=['float'],
-        )
+        # 4) Pre-process each text chunk
+        processed_texts = [self.process_text(t) for t in iterable_texts]
 
-        if not response or not response.embeddings or not response.embeddings.float:
-            self.logger.error("Error while embedding text with CoHere")
+        # 5) Call Cohere embed endpoint
+        try: 
+            response = self.client.embed(
+                model=self.embedding_model_id,
+                texts=processed_texts,
+                input_type=input_type,
+                embedding_types=["float"],
+            )
+        except Exception as e:
+            self.logger.error(f"CoHere embed API call failed: {e}")
             return None
-        
-        return [ f for f in response.embeddings.float ]
+
+        # 6) Validate the response structure
+        if (
+            not response
+            or not getattr(response, "embeddings", None)
+            or not getattr(response.embeddings, "float", None)
+        ):
+            self.logger.error("Invalid embedding response from CoHere")
+            return None
+
+        # 7) Return the raw float vectors
+        return response.embeddings.float
     
     def construct_prompt(self, prompt: str, role: str):
         return {

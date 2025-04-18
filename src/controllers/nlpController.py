@@ -544,7 +544,7 @@ async def graph(request: Request, query:GraphRequest, project_id: int):
         #web_search_client = request.app.web_search_client
     )
 
-    state = {"question": query.text, "project_id": project_id}  # Adjust Project if needed
+    state = {"question": query.text, "project_id": project_id} # Adjust Project if needed
     graphflow = GraphFlow(state, nlp_service)
 
     handlers = {

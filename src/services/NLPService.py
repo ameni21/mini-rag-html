@@ -101,7 +101,7 @@ class NLPService(BaseService):
         collection_name = self.create_collection_name(project_id=project_id)
 
         # step2: get text embedding vector
-        vectors = self.embedding_client.embed_text(text=text, 
+        vectors = await self.embedding_client.embed_text(text=text, 
                                                  document_type=DocumentTypeEnum.QUERY.value)
 
         if not vectors or len(vectors) == 0:
