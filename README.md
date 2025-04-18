@@ -11,6 +11,51 @@ The chatbot should dynamically choose the best retrieval mode based on the
 nature of the user’s query, demonstrating context awareness and retrieval strategy
 switching.
 
+## 🚀 Key Highlights
+
+✅ **Robust PostgreSQL Integration** with seamless data migration using **Alembic** and **SQLAlchemy**  
+✅ **Clean model initialization** leveraging **Pydantic** schemas for validation and consistency  
+✅ **Scalable semantic search** powered by **Qdrant**, serving as a high-performance vector database  
+✅ **Modular LLM Provider Interface** implemented via a factory pattern, enabling easy extensibility and clean code  
+✅ **Support for both local and remote LLMs**, including OpenAI and Ollama-based models  
+✅ **Custom multilingual prompt templates**, optimized for **Arabic** and **English** use cases  
+✅ **MVC-based architecture** ensuring separation of concerns and maintainability  
+✅ **End-to-end NLP pipeline**: `Upload ➝ Chunk ➝ Index ➝ Query ➝ Generate Answer`  
+✅ **Adaptive RAG Strategy**: intelligent query routing between multiple sources based on content type and relevance.
+
+📘 [Read more: Adaptive RAG strategy using LangGraph (Official Tutorial)](https://github.com/langchain-ai/langgraph/blob/main/docs/docs/tutorials/rag/langgraph_adaptive_rag.ipynb)  
+🖼️ Adaptive RAG Routing Overview:  
+![Adaptive RAG Strategy](src/assets/images/adaptative_rag_starigie.png)
+
+Supported routes:
+- 🌐 **Web Search**: for questions involving recent or external information  
+- 🔄 **Self-Corrective RAG**: for refining answers based on indexed documents  
+- 🧠 **LLM with internal vector data**: for deep semantic search on local embeddings  
+- 🚀 **LLM with external data route**: newly added support for dynamic data sources
+
+---
+
+## 📦 Tech Stack
+
+- **FastAPI** for the backend API
+- **PostgreSQL + pgvector** for structured data and vector storage
+- **Qdrant** as the semantic search engine
+- **LangGraph** for multi-tool RAG orchestration
+- **Pydantic** for model validation
+- **Alembic** for database migration
+- **Docker** for containerization
+
+---
+
+## 🧪 Evaluation with LangSmith
+
+We use to trace RAG workflows.
+
+🔍 [View Example Trace](https://smith.langchain.com/public/2ae5ef28-7c59-47b7-b5cd-e9f70596544f/r)
+
+
+
+
 ## Table of Contents
 - Requirements
 - Installation
