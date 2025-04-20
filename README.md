@@ -42,7 +42,7 @@ The chatbot dynamically determines the best strategy based on the user query, sh
 
 The chatbot analyzes each query and selects among:
 
-- **retrieval augmented generation**
+- **Retrieval Augmented Generation**
 - **Web search**
 - **Direct LLM generation**
 
@@ -86,7 +86,7 @@ This system uses **self-correction and retry logic** to improve grounding and ac
 
 ## 🧠 Architecture Diagram
 
-![Architecture Diagram](/home/user/Documents/Project/mini-rag-html/src/assets/images/multi-source-rag-class_diagram.png)
+![Architecture Diagram](src/assets/images/multi-source-rag-class_diagram.png)
 
 > _Note: The assets table  uses a generalized naming convention to support easy future integration of other data modalities such as images, audio, and various data types._
 
@@ -129,7 +129,7 @@ Browse `src/assets/images/` for:
 ---
 ## 📖 Further Reading
 
-- 📘 [Read more: Adaptive RAG strategy using LangGraph (Official Tutorial)](https://github.com/langchain-ai/langgraph/blob/main/docs/docs/tutorials/rag/langgraph_adaptive_rag.ipynb)  
+- [Read more: Adaptive RAG strategy using LangGraph (Official Tutorial)](https://github.com/langchain-ai/langgraph/blob/main/docs/docs/tutorials/rag/langgraph_adaptive_rag.ipynb)  
 - [Qdrant – Vector Database Overview](https://qdrant.tech/qdrant-vector-database/)
 
 
