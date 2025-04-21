@@ -11,6 +11,9 @@ This project implements a **Retrieval-Augmented Generation (RAG) Chatbot** capab
 The chatbot dynamically determines the best strategy based on the user query, showcasing **context awareness** and an **adaptive retrieval strategy**.
 
 ---
+> _Note: The code has two branches: one before the deadline and another after it. I succeeded in running the chatbot with both web search and vector database data, as well as the chatbot with direct LLM integration._
+
+---
 
 ## 📚 Table of Contents
 
@@ -18,10 +21,13 @@ The chatbot dynamically determines the best strategy based on the user query, sh
 - [What the Chatbot Can Do](#what-the-chatbot-can-do)
 - [Key Highlights](#key-highlights)
 - [Tech Stack](#tech-stack)
+- [Results](#results)
 - [Evaluation with LangSmith](#evaluation-with-langsmith)
 - [Architecture Diagram](#architecture-diagram)
 - [Screenshots & Logs](#screenshots--logs)
-- [Requirements & Installation & Run the FastAPI server](#Requirements-Installation-Run-the-FastAPI-server)
+- [Requirements & Installation & Run the FastAPI server](#requirements-installation-run-the-fastapi-server)
+
+
 
 ---
 
@@ -108,6 +114,17 @@ This system uses **self-correction and retry logic** to improve grounding and ac
 
 ---
 
+## Results 
+
+- Runtime Chatbot with Internal Data
+[Runtime chatbot with external data](src/assets/images/runtime/runtime_llm_internal_data.png)
+
+- Runtime Chatbot with Web Search (after 18/04/2025)
+[Runtime chatbot with web search](/home/user/Documents/Project/mini-rag-html/src/assets/images/runtime/run_time_web_search.png)
+
+- Runtime Chatbot with Vector Database (after 18/04/2025)
+[Runtime chatbot with vectore database](src/assets/images/runtime/run_time_rag.png)
+
 ## 🧪 Evaluation with LangSmith
 
 We use to trace RAG workflows.
@@ -131,7 +148,8 @@ Browse `src/assets/images/` for:
 
 - [Read more: Adaptive RAG strategy using LangGraph (Official Tutorial)](https://github.com/langchain-ai/langgraph/blob/main/docs/docs/tutorials/rag/langgraph_adaptive_rag.ipynb)  
 - [Qdrant – Vector Database Overview](https://qdrant.tech/qdrant-vector-database/)
-
+- [Cohere – LLMs Provider Overview](https://cohere.com/about)
+- [Fastapi – web framework for building APIs with Python](https://fastapi.tiangolo.com/)
 
 ---
 

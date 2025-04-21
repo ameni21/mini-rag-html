@@ -95,25 +95,23 @@ class NLPService(BaseService):
     
     @traceable(run_type="retriever")
     async def search_vector_db_collection(self, project_id: int, text: str, limit: int = 10):
-
-        # step1: get collection name
-        query_vector = None
+        # Step 1: Get collection name
         collection_name = self.create_collection_name(project_id=project_id)
 
-        # step2: get text embedding vector
-        vectors = await self.embedding_client.embed_text(text=text, 
-                                                 document_type=DocumentTypeEnum.QUERY.value)
+        # Step 2: Get text embedding vector
+        vectors = await self.embedding_client.embed_text(
+            text=text, 
+            document_type=DocumentTypeEnum.QUERY.value
+        )
 
-        if not vectors or len(vectors) == 0:
-            return False
-        
-        if isinstance(vectors, list) and len(vectors) > 0:
-            query_vector = vectors[0]
+        if not vectors:
+            return []
 
+        query_vector = vectors[0] if isinstance(vectors, list) and vectors else None
         if not query_vector:
-            return False    
+            return []
 
-        # step3: do semantic search
+        # Step 3: Perform semantic search
         results = await self.vectordb_client.search_by_vector(
             collection_name=collection_name,
             vector=query_vector,
@@ -121,9 +119,19 @@ class NLPService(BaseService):
         )
 
         if not results:
-            return False
+            return []
 
-        return results
+        # Step 4: Serialize results (convert to dict)
+        serialized = []
+        for doc in results:
+            serialized.append({
+                'content': getattr(doc, 'content', None),
+                'metadata': getattr(doc, 'metadata', {}),
+                'score': getattr(doc, 'score', None)
+            })
+
+        return serialized
+
     
     async def answer_rag_question(self,  query: str, retrieve_documents:List ):
         
@@ -325,11 +333,13 @@ class NLPService(BaseService):
         system_prompt = self.template_parser.get("garding","system_prompt")
 
         documents_prompts = "\n".join([
-            self.template_parser.get("garding","documents_prompt", {
-                    "doc_num": idx + 1,
-                    "chunk_text": self.generation_client.process_text(
-                        doc.text if hasattr(doc, 'text') else doc),
-                })
+            self.template_parser.get("garding", "documents_prompt", {
+                "doc_num": idx + 1,
+                "chunk_text": self.generation_client.process_text(
+                    str(doc.get('content', '')) if isinstance(doc, dict)
+                    else str(getattr(doc, 'text', doc))
+                )
+            })
             for idx, doc in enumerate(retrieve_documents)
         ])
 
