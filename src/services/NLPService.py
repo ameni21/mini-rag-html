@@ -125,7 +125,7 @@ class NLPService(BaseService):
 
         return results
     
-    async def answer_rag_question(self,  query: str, retrieve_documents:List[RetrievedDocument] ):
+    async def answer_rag_question(self,  query: str, retrieve_documents:List ):
         
         answer, full_prompt, chat_history = None, None, None
 
@@ -139,7 +139,8 @@ class NLPService(BaseService):
         documents_prompts = "\n".join([
             self.template_parser.get("rag","documents_prompt", {
                     "doc_num": idx + 1,
-                    "chunk_text": self.generation_client.process_text(doc.text),
+                    "chunk_text": self.generation_client.process_text(
+                        doc.text if hasattr(doc, 'text') else doc),
                 })
             for idx, doc in enumerate(retrieve_documents)
         ])
@@ -150,7 +151,7 @@ class NLPService(BaseService):
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
                 role="system"
-                #self.generation_client.enums.SYSTEM.value,
+    
             )
         ]
 
@@ -199,9 +200,16 @@ class NLPService(BaseService):
         os.environ["TAVILY_API_KEY"] = settings.TAVILY_API_KEY
         
         
-        # step1: retrieve related documents
+        # step 1: retrieve related documents
         web_search_tool = TavilySearchResults(k=3, tavily_api_key=os.environ["TAVILY_API_KEY"])
-        
+
+        # step 2 : Make sure the query is a string
+        if isinstance(query, dict) and "text" in query:
+            query = query["text"]
+        elif not isinstance(query, str):
+            query = str(query)
+
+        # step 3: Call the tool with the properly formatted query
         results_list = web_search_tool.invoke({"query": query})
 
         if not results_list or len(results_list) == 0:
@@ -249,7 +257,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
-    async def GradeHallucinations(self, retrieve_documents:List[RetrievedDocument],  generation : str):
+    async def GradeHallucinations(self, retrieve_documents:List,  generation : str):
         
         answer, full_prompt, chat_history = None, None, None
         
@@ -264,7 +272,7 @@ class NLPService(BaseService):
         document_prompts = "\n".join([
             self.template_parser.get("grounding", "documents_prompt", {
                     "doc_num": idx + 1,
-                    "chunk_text": doc.text,
+                    "chunk_text": doc.text if hasattr(doc, 'text') else doc,
                 }) 
             for idx, doc in enumerate(retrieve_documents)
 
@@ -303,7 +311,7 @@ class NLPService(BaseService):
         return answer, full_prompt, chat_history
     
 
-    async def gard_documents_retrieval(self, query:str, retrieve_documents:List[RetrievedDocument]):
+    async def gard_documents_retrieval(self, query:str, retrieve_documents:List):
         
         answer, full_prompt, chat_history = None, None, None
 
@@ -319,7 +327,8 @@ class NLPService(BaseService):
         documents_prompts = "\n".join([
             self.template_parser.get("garding","documents_prompt", {
                     "doc_num": idx + 1,
-                    "chunk_text": self.generation_client.process_text(doc.text),
+                    "chunk_text": self.generation_client.process_text(
+                        doc.text if hasattr(doc, 'text') else doc),
                 })
             for idx, doc in enumerate(retrieve_documents)
         ])

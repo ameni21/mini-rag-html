@@ -534,18 +534,17 @@ async def question_re_writer(request: Request):
 
 
 @nlp_router.post("/index/graph/{project_id}")
-async def graph(request: Request, query:GraphRequest, project_id: int):
-
+async def graph(request: Request, query: GraphRequest, project_id: int):
     nlp_service = NLPService(
         vectordb_client=request.app.vectordb_client,
         generation_client=request.app.generation_client,
         embedding_client=request.app.embedding_client,
         template_parser=request.app.template_parser,
-        #web_search_client = request.app.web_search_client
     )
 
-    state = {"question": query.text, "project_id": project_id} # Adjust Project if needed
-    graphflow = GraphFlow(state, nlp_service)
+    # Initialize state with just the query text, not the entire query object
+    initial_state = {"question": query.text, "project_id": project_id}
+    graphflow = GraphFlow(initial_state, nlp_service)
 
     handlers = {
         "route_question_to_source": graphflow.route_question_to_source,
@@ -558,33 +557,47 @@ async def graph(request: Request, query:GraphRequest, project_id: int):
         "reformulate_question": graphflow.reformulate_question,
     }
 
-    graph_instance = Graph(handlers)
-    compiled_graph = graph_instance.build()
-   
-    
-    async for output in compiled_graph.astream({"question": query, "project_id": project_id}):
-        for key, value in output.items():
-             logger.info(f"Node '{key}':")
-        logger.info("\n---\n")
-
-    generation = output
-    logger.info(generation)
-    
-    
-    
-    if not generation:
+    try:
+        graph_instance = Graph(handlers)
+        compiled_graph = graph_instance.build()
+        
+        # Pass the correct initial state to the graph
+        results = {}
+        async for output in compiled_graph.astream(initial_state):
+            # Merge all outputs into one result dictionary
+            for key, value in output.items():
+                results[key] = value
+            logger.info(f"Processed node: {list(output.keys())[0]}")
+        
+        if not results:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={
+                    "signal": ResponseSignal.RAG_ANSWER_ERROR.value
+                }
+            )
+        
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "signal": ResponseSignal.RAG_ANSWER_ERROR.value
-            }
-        )
-    
-    return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={
                 "signal": ResponseSignal.RAG_ANSWER_SUCCESS.value,
-                "answer": output,
-                
+                "answer": results.get("generation", "No answer generated"),
+                "full_results": results
             }
         )
+    except Exception as e:
+        logger.error(f"Error in graph execution: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "signal": ResponseSignal.RAG_ANSWER_ERROR.value,
+                "error": str(e)
+            }
+        )
+    finally:
+        # Ensure proper cleanup
+        if hasattr(request.app, 'vectordb_client') and hasattr(request.app.vectordb_client, 'disconnect'):
+            try:
+                await request.app.vectordb_client.disconnect()
+            except Exception as e:
+                logger.error(f"Error disconnecting from vector DB: {str(e)}")

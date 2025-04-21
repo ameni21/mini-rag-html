@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from typing_extensions import TypedDict
 
@@ -15,5 +15,5 @@ class GraphState(TypedDict):
 
     project_id: int
     question: str
-    generation: str
-    documents: List[str]
+    generation: Optional[str]
+    documents: Optional[List[str]]
