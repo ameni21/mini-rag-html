@@ -117,13 +117,13 @@ This system uses **self-correction and retry logic** to improve grounding and ac
 ## Results 
 
 - Runtime Chatbot with Internal Data
-![Runtime chatbot with external data](src/assets/images/runtime/runtime_llm_internal_data.png)
+![Runtime chatbot with external data](src/assets/images/runtime/graph_internal.png)
 
 - Runtime Chatbot with Web Search (after 18/04/2025)
-![Runtime chatbot with web search](src/assets/images/runtime/run_time_web_search.png)
+![Runtime chatbot with web search](src/assets/images/runtime/graph_web.png)
 
 - Runtime Chatbot with Vector Database (after 18/04/2025)
-![Runtime chatbot with vectore database](src/assets/images/runtime/run_time_rag.png)
+![Runtime chatbot with vectore database](src/assets/images/runtime/graph_vectorstore.png)
 
 ## 🧪 Evaluation with LangSmith
 

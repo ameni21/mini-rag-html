@@ -4,4 +4,4 @@ class ProcessingEnum(Enum):
 
     TXT = ".txt"
     PDF = ".pdf"
-    HTML = ".html"
+    

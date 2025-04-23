@@ -46,6 +46,19 @@ class NLPService(BaseService):
         else:
             return "no"
         
+    def _get_doc_content(self, doc):
+        """Safely extract content from a document regardless of its type"""
+        if hasattr(doc, 'text'):
+            return doc.text
+        elif isinstance(doc, dict) and 'content' in doc:
+            return doc['content']
+        elif isinstance(doc, (str, int, float, bool)):
+            return str(doc)
+        else:
+            # Handle other types, including slice
+            logger.warning(f"Unexpected document type: {type(doc)}, converting to string")
+            return str(doc)
+        
 
     def create_collection_name(self, project_id: str):
         return f"collection_{self.vectordb_client.default_vector_size}_{project_id}".strip()
@@ -94,7 +107,7 @@ class NLPService(BaseService):
         return True
     
     @traceable(run_type="retriever")
-    async def search_vector_db_collection(self, project_id: int, text: str, limit: int = 10):
+    async def search_vector_db_collection(self, project_id: int, text: str, limit: int = 5):
         # Step 1: Get collection name
         collection_name = self.create_collection_name(project_id=project_id)
 
@@ -125,8 +138,7 @@ class NLPService(BaseService):
         serialized = []
         for doc in results:
             serialized.append({
-                'content': getattr(doc, 'content', None),
-                'metadata': getattr(doc, 'metadata', {}),
+                'content': getattr(doc, 'text', None),
                 'score': getattr(doc, 'score', None)
             })
 
@@ -148,8 +160,9 @@ class NLPService(BaseService):
             self.template_parser.get("rag","documents_prompt", {
                     "doc_num": idx + 1,
                     "chunk_text": self.generation_client.process_text(
-                        doc.text if hasattr(doc, 'text') else doc),
-                })
+                        self._get_doc_content(doc)
+                ),
+            })
             for idx, doc in enumerate(retrieve_documents)
         ])
 

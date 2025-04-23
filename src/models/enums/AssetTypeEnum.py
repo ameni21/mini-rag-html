@@ -2,4 +2,4 @@ from enum import Enum
 
 class AssetTypeEnum(Enum):
 
-    FILE = "html"
+    FILE = "file"
