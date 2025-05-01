@@ -144,7 +144,7 @@ class NLPService(BaseService):
 
         return serialized
 
-    
+    @traceable(run_type="llm")
     async def answer_rag_question(self,  query: str, retrieve_documents:List ):
         
         answer, full_prompt, chat_history = None, None, None
@@ -185,6 +185,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
+    @traceable(run_type="llm")
     async def answer_llm_question(self,  query: str):
         
         answer, full_prompt, chat_history = None, None, None
@@ -215,7 +216,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
         
-    
+    @traceable(run_type="tool")
     async def web_search_question(self, query: str):
         settings = get_settings()
         os.environ["TAVILY_API_KEY"] = settings.TAVILY_API_KEY
@@ -241,7 +242,7 @@ class NLPService(BaseService):
     
 
     
-
+    @traceable(run_type="chain")
     async def llm_router(self, query: str):
         
         answer, full_prompt, chat_history = None, None, None
@@ -278,6 +279,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
+    @traceable(run_type="parser")
     async def GradeHallucinations(self, retrieve_documents:List,  generation : str):
         
         answer, full_prompt, chat_history = None, None, None
@@ -331,7 +333,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
-
+    @traceable(run_type="retriever")
     async def gard_documents_retrieval(self, query:str, retrieve_documents:List):
         
         answer, full_prompt, chat_history = None, None, None
@@ -386,7 +388,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
-
+    @traceable(run_type="parser")
     async def gradeAnswer(self, query:str,  generation : str):
         
         answer, full_prompt, chat_history = None, None, None
@@ -426,7 +428,7 @@ class NLPService(BaseService):
 
         return answer, full_prompt, chat_history
     
-
+    @traceable(run_type="prompt")
     async def question_re_writer(self,  query: str ):
         
         answer, full_prompt, chat_history = None, None, None

@@ -10,10 +10,6 @@ This project implements a **Retrieval-Augmented Generation (RAG) Chatbot** capab
 
 The chatbot dynamically determines the best strategy based on the user query, showcasing **context awareness** and an **adaptive retrieval strategy**.
 
----
-> _Note: The code has two branches: one before the deadline and another after it. I succeeded in running the chatbot with both web search and vector database data, as well as the chatbot with direct LLM integration._
-
----
 
 ## 📚 Table of Contents
 
@@ -119,10 +115,10 @@ This system uses **self-correction and retry logic** to improve grounding and ac
 - Runtime Chatbot with Internal Data
 ![Runtime chatbot with external data](src/assets/images/runtime/graph_internal.png)
 
-- Runtime Chatbot with Web Search (after 18/04/2025)
+- Runtime Chatbot with Web Search 
 ![Runtime chatbot with web search](src/assets/images/runtime/graph_web.png)
 
-- Runtime Chatbot with Vector Database (after 18/04/2025)
+- Runtime Chatbot with Vector Database 
 ![Runtime chatbot with vectore database](src/assets/images/runtime/graph_vectorstore.png)
 
 ## 🧪 Evaluation with LangSmith
